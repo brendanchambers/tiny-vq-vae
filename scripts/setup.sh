@@ -11,6 +11,8 @@ source activate ~/anaconda3/envs/vqvae
 pip install datasets
 pip install Pillow
 pip install --upgrade diffusers[torch]
+pip install torchvision
+pip install matplotlib
 
 mkdir -p data/incoming
 
