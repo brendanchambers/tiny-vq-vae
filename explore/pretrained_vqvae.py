@@ -54,7 +54,7 @@ example_transforms = v2.Compose([
 
 print('apply preprocessing transformations...')
 print(dataset['train'][0])
-dataset['train'][0]['image'].show()
+# dataset['train'][0]['image'].show()
 
 train_dataset = dataset["train"].with_transform(example_transforms)   # hmmm todo look cloesr at this
 
@@ -62,7 +62,7 @@ print('after preprocessing...')
 print(train_dataset)
 print(train_dataset[0]['image'].size())
 pil_image = v2.functional.to_pil_image(train_dataset[0]['image'])
-pil_image.show()
+# pil_image.show()
 
 
 
@@ -70,19 +70,16 @@ pil_image.show()
 
 # tokenize the dataset using a default init'd vqvae model
 model = VQModel()
-# print('\n\n\n\n')
-# print(model)
+print('\n\n\n\n')
+print(model)
 #     size of the model inputs: 64
 
 i_img = 0
 img = train_dataset[0]['image']
-# outs = model(img)
-# print(outs)
-# print(type(outs))
-
-
-'''
-, tuple of (int, int), tuple of (int, int), tuple of (int, int), int)
- * (Tensor input, Tensor weight, Tensor bias = None, tuple of ints stride = 1, str padding = "valid", tuple of ints dilation = 1, int groups = 1)
-      didn't match because some of the arguments have invalid types: (JpegImageFile, Parameter, Parameter, tuple of (int, int), tuple of (int, int), tuple of (int, int), int)
-'''
+print(type(img))
+print(img.size())
+img = torch.unsqueeze(img,0)  # add a batch dimension 
+print(img.size())
+outs = model(img)
+print(outs)
+print(type(outs))
