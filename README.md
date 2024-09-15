@@ -13,3 +13,5 @@ explore and learn more about vq vae
 - look at pretrained vq vae and visualize tokens  
 - train a vq vae on visual poetry pdf set  
 
+
+

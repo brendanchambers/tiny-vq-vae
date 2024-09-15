@@ -14,6 +14,8 @@ pip install --upgrade diffusers[torch]
 pip install torchvision
 pip install matplotlib
 
-mkdir -p data/incoming
+mkdir -p $project_dir/data/incoming
+
+echo "data/**\nmodels/**\ncredentials/**\n" > $project_dir/.gitignore
 
 

@@ -15,16 +15,16 @@ import time
 # define some default values to get an exploration working
 
 @dataclass
-class QuickArgs:
+class Quickconfig:
     hresolution: int = 64
     wresolution: int = 64
     center_crop: float = None
     random_flip: bool = True
     bsz: int = 2
 
-args = QuickArgs()
-print(args)
-print(f"x res: {args.wresolution}  y res: {args.hresolution}")
+config = Quickconfig()
+print(config)
+print(f"x res: {config.wresolution}  y res: {config.hresolution}")
 
 
 #####################
@@ -48,10 +48,10 @@ print(dataset['train'][0]['image'])  # {'image':, 'label':}
 # Preprocessing the datasets.
 example_transforms = v2.Compose([
     v2.ToImage(),  # Convert to tensor, only needed if you had a PIL image
-    v2.Resize((args.wresolution, args.hresolution), interpolation=v2.InterpolationMode.BILINEAR),   
+    v2.Resize((config.wresolution, config.hresolution), interpolation=v2.InterpolationMode.BILINEAR),   
     v2.ToDtype(torch.uint8, scale=True),  # optional, most input are already uint8 at this point
     # ...
-    v2.RandomResizedCrop(size=(args.wresolution, args.hresolution), antialias=True),  # Or Resize(antialias=True)  (todo how does this interact with resize?)
+    v2.RandomResizedCrop(size=(config.wresolution, config.hresolution), antialias=True),  # Or Resize(antialias=True)  (todo how does this interact with resize?)
     # ...
     v2.ToDtype(torch.float32, scale=True),  # Normalize expects float input
     # v2.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
@@ -118,7 +118,7 @@ def yield_batches(itr, n=1):
 def pack_batch(batch):
 
     # handle singleton batch
-    if args.bsz==1:
+    if config.bsz==1:
         image = batch['image'][0]
         batched_tensor = image.unsqueeze(dim=0)
     else:
@@ -131,7 +131,7 @@ def pack_batch(batch):
 
 t_s = time.time()
 
-for i_batch, batch_entries in enumerate(yield_batches(train_dataset, n=args.bsz)):
+for i_batch, batch_entries in enumerate(yield_batches(train_dataset, n=config.bsz)):
     print(f"i batch: {i_batch}")
     batched_tensor = pack_batch(batch_entries)
 
@@ -141,7 +141,7 @@ for i_batch, batch_entries in enumerate(yield_batches(train_dataset, n=args.bsz)
 t_e = time.time()
 print(f"elapsed (s): {t_e - t_s}")
 print(f"num images: {len(train_dataset)}")
-print(f"batchsize: {args.bsz}")
+print(f"batchsize: {config.bsz}")
 print(f"images / s: {len(train_dataset) / (t_e - t_s)}")   # ~11 img/s bsz=1 cpu tiny-laptop
                                                             # ~14 imgs/s bsz=2 cpu tiny-laptop
 
