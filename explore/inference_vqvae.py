@@ -20,7 +20,8 @@ class Quickconfig:
     wresolution: int = 64
     center_crop: float = None
     random_flip: bool = True
-    bsz: int = 2
+    bsz: int = 128
+    device: str = "cuda:0"
 
 config = Quickconfig()
 print(config)
@@ -29,6 +30,8 @@ print(f"x res: {config.wresolution}  y res: {config.hresolution}")
 
 #####################
 # quick arbitrary example to learn about typical preprocessing steps
+
+torch.cuda.empty_cache()
 
 image_dataset = "jbarat/plant_species"
 dataset = load_dataset(image_dataset)
@@ -75,7 +78,7 @@ print(train_dataset[1]['image'].size())
 ######## inference
 
 # tokenize the dataset using a default init'd vqvae model
-model = VQModel()
+model = VQModel().to(config.device)
 print(f"\n\n\n\n{model}\n\n\n\n")
 #     size of the model inputs: 64
 
@@ -102,10 +105,15 @@ img = train_dataset[i_img]['image']
 batched_img = torch.unsqueeze(img, 0)  # add a batch dimension 
 print(img.size())
 print(batched_img.size())
-outs = model(batched_img)
+outs = model(batched_img.to(config.device))
 print('=============================')
 
-visualize_outs(outs[0,:])  # show the sample and loss
+try:
+    
+    visualize_outs(outs[0,:])  # show the sample and loss
+                # tuple indexig error here - todo fix or delete
+except:
+    print('warning: todo fix visualize_outs function')
 
 
 ######################################
@@ -121,9 +129,11 @@ def pack_batch(batch):
     if config.bsz==1:
         image = batch['image'][0]
         batched_tensor = image.unsqueeze(dim=0)
+        batched_tensor = batched_tensor.to(config.device)
     else:
         images = batch['image']
         batched_tensor = torch.stack(images, dim=0)
+        batched_tensor = batched_tensor.to(config.device)
 
     return batched_tensor
 
@@ -136,7 +146,7 @@ for i_batch, batch_entries in enumerate(yield_batches(train_dataset, n=config.bs
     batched_tensor = pack_batch(batch_entries)
 
     with torch.inference_mode():
-        outs = model(batched_tensor)
+        outs = model(batched_tensor)  # todo - VQ model likely has a n initializaiton problem
 
 t_e = time.time()
 print(f"elapsed (s): {t_e - t_s}")
@@ -144,5 +154,8 @@ print(f"num images: {len(train_dataset)}")
 print(f"batchsize: {config.bsz}")
 print(f"images / s: {len(train_dataset) / (t_e - t_s)}")   # ~11 img/s bsz=1 cpu tiny-laptop
                                                             # ~14 imgs/s bsz=2 cpu tiny-laptop
-
+                                                            # ~39.9 second measurement; ~71 img/s bsz=2 gpu GeForce 1050 Ti 
+                                                            # ~43 img/s bsz=32 gtx 1050 ti moble
+                                                            #   performance seems to be dropping, may be heat or power limit
+                                                            # 128 similar, bsz 1024 oom
 
