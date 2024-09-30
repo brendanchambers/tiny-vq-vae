@@ -1,5 +1,5 @@
-# learn the absolute basics
-#   and get a sense for how slow cpu inference is with no optimizations
+# 0th learning attempt at vqvae 
+# inference a randomly init'd vqvae on an example plant species dataset
 
 from datasets import load_dataset
 from diffusers import VQModel
